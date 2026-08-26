@@ -1,0 +1,16 @@
+schemaVersion: "1"
+name: hermes-agent
+agent: hermes-agent
+
+# Resolve the personal kit relative to this environment file.
+kits:
+  - .
+
+# Keep this repository outside the mounted workspace. Set HERMES_WORKSPACE to
+# the absolute path of the project Hermes should work on.
+workspace: ${HERMES_WORKSPACE}
+
+sandboxOptions:
+  cpus: 4
+  memory: 8g
+  pullPolicy: missing

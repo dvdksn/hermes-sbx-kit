@@ -31,24 +31,60 @@ corresponding service contains an API key.
 The real keys remain on the host. The sandbox receives sentinel values, and the
 forward proxy substitutes the real authorization headers on outbound requests.
 
-## Run
+## Run with `sbx env`
 
-Clone the repository and load the kit from its local directory:
+`sbx env` requires `sbx` 0.39.0 or later. Keep this repository outside the
+workspace mounted into the sandbox, then point `HERMES_WORKSPACE` at the project
+Hermes should edit:
 
 ```console
 git clone https://github.com/dvdksn/hermes-sbx-kit.git
-sbx run --kit ./hermes-sbx-kit hermes-agent
+cd hermes-sbx-kit
+
+export HERMES_WORKSPACE="$HOME/src/my-project"
+sbx env run
 ```
 
-For a clean recreation after changing the kit or image:
+The checked-in `.sbxenv.yaml` gives the sandbox the stable name
+`hermes-agent`, loads this local kit, and allocates four CPUs and 8 GiB of
+memory. Override the environment file with `SBX_ENV_FILE` if you maintain a
+machine-local variant.
+
+You can still run the kit directly without `sbx env`:
 
 ```console
-sbx rm hermes-agent
 sbx run --kit ./hermes-sbx-kit hermes-agent
 ```
 
 Once Hermes starts, select a model with `hermes model` or connect through the
 Hermes desktop app over SSH.
+
+## Local state backups
+
+The host-side scripts use Hermes's native backup and import commands. Hermes
+creates a consistent snapshot using SQLite's online backup API; `sbx cp` moves
+the ZIP outside the ephemeral sandbox.
+
+```console
+./scripts/backup                 # snapshot to protected host storage
+./scripts/restore                # restore latest.zip
+./scripts/restore /path/file.zip # restore a specific snapshot
+./scripts/recreate               # backup → remove → create → restore → attach
+```
+
+Default backup locations:
+
+- macOS: `~/Library/Application Support/hermes-sbx/backups/`
+- Linux: `${XDG_STATE_HOME:-~/.local/state}/hermes-sbx/backups/`
+
+Set `HERMES_BACKUP_DIR` to override the location. Directories are mode `0700`,
+backup ZIPs are mode `0600`, and plaintext temporary copies inside the sandbox
+are removed after transfer.
+
+A full Hermes backup contains `.env`, `auth.json`, sessions, and other sensitive
+state. Keep the backup directory outside Git and on an encrypted host disk.
+These local backups survive `sbx env rm`, but not loss of the host itself; use
+your normal host backup system for off-host disaster recovery.
 
 ## Why the launcher exists
 
