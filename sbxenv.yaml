@@ -8,3 +8,13 @@ kits:
   - docker.io/sbx/github-ssh-kit:latest
 
 # No workspace is mounted. CPU and memory use the sbx defaults.
+
+secrets:
+  anthropic:
+    ref: op://Work/Anthropic/credential
+    refresh: 55m
+  openai:
+    ref: op://Work/OpenAI/credential
+    refresh: 55m
+  github:
+    command: gh auth token
