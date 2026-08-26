@@ -14,13 +14,19 @@ avoids reinstalling it whenever a sandbox is created.
 
 ## Configure provider credentials
 
-Configure whichever providers you use on the host:
+Configure whichever providers you use on the host, supplying an **API key** for
+each service:
 
 ```console
 sbx secret set anthropic
 sbx secret set openai
 sbx secret set openrouter
 ```
+
+Do not use the host-side OAuth credentials intended for agent-specific clients
+such as Claude Code or Codex. Hermes is a separate multi-provider client; in
+this setup, Anthropic and OpenAI inference works through the proxy when the
+corresponding service contains an API key.
 
 The real keys remain on the host. The sandbox receives sentinel values, and the
 forward proxy substitutes the real authorization headers on outbound requests.
