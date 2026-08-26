@@ -1,0 +1,10 @@
+schemaVersion: "1"
+name: hermes-agent
+agent: hermes-agent
+
+kits:
+  - ./kits/hermes-agent
+  - docker.io/sbx/git-ssh-sign-kit:latest
+  - docker.io/sbx/github-ssh-kit:latest
+
+# No workspace is mounted. CPU and memory use the sbx defaults.

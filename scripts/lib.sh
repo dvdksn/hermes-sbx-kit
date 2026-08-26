@@ -3,7 +3,7 @@ set -euo pipefail
 umask 077
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
-ENV_FILE=${SBX_ENV_FILE:-$ROOT/.sbxenv.yaml}
+ENV_FILE=${SBX_ENV_FILE:-$ROOT/sbxenv.yaml}
 SANDBOX_NAME=${HERMES_SANDBOX_NAME:-hermes-agent}
 
 if [[ -n ${HERMES_BACKUP_DIR:-} ]]; then

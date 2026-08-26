@@ -33,27 +33,36 @@ forward proxy substitutes the real authorization headers on outbound requests.
 
 ## Run with `sbx env`
 
-`sbx env` requires `sbx` 0.39.0 or later. Keep this repository outside the
-workspace mounted into the sandbox, then point `HERMES_WORKSPACE` at the project
-Hermes should edit:
+The repository uses the upcoming unhidden `sbxenv.yaml` filename. From the
+repository root:
 
 ```console
 git clone https://github.com/dvdksn/hermes-sbx-kit.git
 cd hermes-sbx-kit
-
-export HERMES_WORKSPACE="$HOME/src/my-project"
 sbx env run
 ```
 
-The checked-in `.sbxenv.yaml` gives the sandbox the stable name
-`hermes-agent`, loads this local kit, and allocates four CPUs and 8 GiB of
-memory. Override the environment file with `SBX_ENV_FILE` if you maintain a
-machine-local variant.
+The environment has the stable name `hermes-agent` and composes three kits:
 
-You can still run the kit directly without `sbx env`:
+- `./kits/hermes-agent` — the image-backed Hermes sandbox kit
+- `docker.io/sbx/git-ssh-sign-kit:latest` — SSH commit signing
+- `docker.io/sbx/github-ssh-kit:latest` — GitHub SSH clone/push support
+
+It intentionally mounts no workspace. CPU and memory are omitted from the
+environment so `sbx` uses its defaults.
+
+Before starting, load the desired Git signing/authentication key into the host
+SSH agent:
 
 ```console
-sbx run --kit ./hermes-sbx-kit hermes-agent
+ssh-add ~/.ssh/id_ed25519
+ssh-add -L
+```
+
+You can still run the agent kit directly without the declarative environment:
+
+```console
+sbx run --kit ./kits/hermes-agent hermes-agent
 ```
 
 Once Hermes starts, select a model with `hermes model` or connect through the
@@ -102,7 +111,7 @@ Build and push for the current architecture:
 docker buildx build \
   --push \
   --tag docker.io/davidkarlsson416/hermes-agent-image:latest \
-  .
+  ./kits/hermes-agent
 ```
 
 To publish both supported architectures from a suitably provisioned builder:
@@ -112,7 +121,7 @@ docker buildx build \
   --platform linux/amd64,linux/arm64 \
   --push \
   --tag docker.io/davidkarlsson416/hermes-agent-image:latest \
-  .
+  ./kits/hermes-agent
 ```
 
 The full Hermes installation includes browser automation, computer-use, media,

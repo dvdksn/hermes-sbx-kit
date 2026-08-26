@@ -1,6 +1,7 @@
 # Machine-local sbx environment overrides
 *.sbxenv.local.yaml
 local.sbxenv.yaml
+sbxenv.local.yaml
 
 # Never place state snapshots in the repository
 backups/
