@@ -31,18 +31,28 @@ corresponding service contains an API key.
 The real keys remain on the host. The sandbox receives sentinel values, and the
 forward proxy substitutes the real authorization headers on outbound requests.
 
-## Run with `sbx env`
+## Create for Hermes Desktop
 
-The repository uses the upcoming unhidden `sbxenv.yaml` filename. From the
-repository root:
+The primary workflow is to provision the environment without attaching a
+terminal session:
 
 ```console
 git clone https://github.com/dvdksn/hermes-sbx-kit.git
 cd hermes-sbx-kit
-sbx env run
+sbx env create sbxenv.yaml
 ```
 
-The environment has the stable name `hermes-agent` and composes three kits:
+Then open the Hermes desktop app and connect to:
+
+```text
+hermes-agent.sbx
+```
+
+The desktop app connects over SSH and wakes the sandbox when necessary. After
+the initial connection, normal interaction happens through Desktop rather than
+an attached terminal UI.
+
+The environment composes three kits:
 
 - `./kits/hermes-agent` — the image-backed Hermes sandbox kit
 - `docker.io/sbx/git-ssh-sign-kit:latest` — SSH commit signing
@@ -51,22 +61,25 @@ The environment has the stable name `hermes-agent` and composes three kits:
 It intentionally mounts no workspace. CPU and memory are omitted from the
 environment so `sbx` uses its defaults.
 
-Before starting, load the desired Git signing/authentication key into the host
-SSH agent:
+Before creating the environment, load the desired Git signing/authentication
+key into the host SSH agent:
 
 ```console
 ssh-add ~/.ssh/id_ed25519
 ssh-add -L
 ```
 
-You can still run the agent kit directly without the declarative environment:
+For optional terminal interaction, attach with:
+
+```console
+sbx env run sbxenv.yaml
+```
+
+You can also run the agent kit directly without the declarative environment:
 
 ```console
 sbx run --kit ./kits/hermes-agent hermes-agent
 ```
-
-Once Hermes starts, select a model with `hermes model` or connect through the
-Hermes desktop app over SSH.
 
 ## Local state backups
 
@@ -78,7 +91,7 @@ the ZIP outside the ephemeral sandbox.
 ./scripts/backup                 # snapshot to protected host storage
 ./scripts/restore                # restore latest.zip
 ./scripts/restore /path/file.zip # restore a specific snapshot
-./scripts/recreate               # backup → remove → create → restore → attach
+./scripts/recreate               # backup → remove → create → restore
 ```
 
 Default backup locations:

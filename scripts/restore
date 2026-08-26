@@ -32,4 +32,5 @@ trap - EXIT
 sbx stop "$SANDBOX_NAME" >/dev/null
 
 printf 'Restore complete: %s\n' "$backup_file"
-printf 'The sandbox is stopped. Run: sbx env run %q\n' "$ENV_FILE"
+printf 'The sandbox is stopped and ready for Hermes Desktop to wake at %s.sbx.\n' "$SANDBOX_NAME"
+printf 'Optional terminal attach: sbx env run %q\n' "$ENV_FILE"

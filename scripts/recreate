@@ -12,5 +12,3 @@ sbx env rm "$ENV_FILE" --force
 sbx env create "$ENV_FILE"
 
 "$SCRIPT_DIR/restore" "$BACKUP_DIR/latest.zip"
-
-exec sbx env run "$ENV_FILE"
