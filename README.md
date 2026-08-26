@@ -81,10 +81,10 @@ could pass installer flags such as `--skip-browser` and
 ## GitHub Actions publishing
 
 The `Publish Hermes sandbox image` workflow is manual (`workflow_dispatch`).
-Before running it, configure these repository secrets:
+Before running it, configure:
 
-- `DOCKERHUB_USERNAME`
-- `DOCKERHUB_TOKEN`
+- Repository variable `DOCKERHUB_USERNAME`
+- Repository secret `DOCKERHUB_TOKEN`
 
 The workflow publishes `latest` and an immutable tag matching the Git commit
 SHA for both AMD64 and ARM64.
