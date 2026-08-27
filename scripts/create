@@ -22,7 +22,7 @@ if [[ ! -e $PERSIST_DIR/config.yaml ]]; then
   echo "Seeded Hermes config at $PERSIST_DIR/config.yaml"
 fi
 
-DOCKER_SANDBOXES_ROOT_SIZE=$ROOT_SIZE sbx env create "$ENV_FILE"
+DOCKER_SANDBOXES_ROOT_SIZE=$ROOT_SIZE sbx env create -y "$ENV_FILE"
 
 # The image entrypoint waits for this host-only marker before launching Hermes.
 # Create it only after successful provisioning; it becomes visible atomically
