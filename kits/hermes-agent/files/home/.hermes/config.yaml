@@ -1,0 +1,20 @@
+# Kit-owned defaults only. Secrets are injected as environment variables by
+# the Docker Sandboxes proxy and must not be stored in this file.
+model: ""
+
+# HERMES_HOME is persisted through an sbx host bind mount. DELETE journaling is
+# safer than WAL on virtiofs and other shared filesystems.
+database:
+  journal_mode: delete
+
+# GITHUB_TOKEN authenticates gh, but Hermes can also interpret it as a GitHub
+# Copilot credential. Keep GitHub tooling without advertising Copilot models.
+model_catalog:
+  excluded_providers:
+    - copilot
+    - copilot-acp
+
+terminal:
+  backend: local
+  cwd: /home/agent
+  home_mode: real

@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -euo pipefail
+umask 077
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
+ENV_FILE=${SBX_ENV_FILE:-$ROOT/sbxenv.yaml}
+SANDBOX_NAME=${HERMES_SANDBOX_NAME:-hermes-agent}
+PERSIST_DIR=${HERMES_PERSIST_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/hermes-sbx/home}
+CONTAINER_HERMES_HOME=/home/agent/.hermes
+MOUNT_MARKER=.sbx-persistent-home
+ROOT_SIZE=${DOCKER_SANDBOXES_ROOT_SIZE:-50GB}
+
+command -v sbx >/dev/null || { echo "error: sbx is required" >&2; exit 1; }
+
+mkdir -p "$PERSIST_DIR"
+chmod 700 "$PERSIST_DIR"
+
+if [[ ! -e $PERSIST_DIR/config.yaml ]]; then
+  cp "$ROOT/kits/hermes-agent/files/home/.hermes/config.yaml" "$PERSIST_DIR/config.yaml"
+  chmod 600 "$PERSIST_DIR/config.yaml"
+  echo "Seeded Hermes config at $PERSIST_DIR/config.yaml"
+fi
+
+DOCKER_SANDBOXES_ROOT_SIZE=$ROOT_SIZE sbx env create "$ENV_FILE"
+
+# The image entrypoint waits for this host-only marker before launching Hermes.
+# Create it only after successful provisioning; it becomes visible atomically
+# when sbx attaches the bind mount.
+created_marker=false
+if [[ ! -e $PERSIST_DIR/$MOUNT_MARKER ]]; then
+  touch "$PERSIST_DIR/$MOUNT_MARKER"
+  created_marker=true
+fi
+cleanup() {
+  if [[ $created_marker == true ]]; then
+    rm -f "$PERSIST_DIR/$MOUNT_MARKER"
+  fi
+}
+trap cleanup EXIT
+
+sbx mount "$SANDBOX_NAME" "$PERSIST_DIR:$CONTAINER_HERMES_HOME:rw"
+
+sbx env exec "$ENV_FILE" -- sh -c \
+  "test -f '$CONTAINER_HERMES_HOME/$MOUNT_MARKER' && test -r '$CONTAINER_HERMES_HOME/config.yaml' && test -w '$CONTAINER_HERMES_HOME'"
+
+trap - EXIT
+
+printf 'Hermes state mounted: %s -> %s\n' "$PERSIST_DIR" "$CONTAINER_HERMES_HOME"
+printf 'Hermes Desktop target: %s.sbx\n' "$SANDBOX_NAME"

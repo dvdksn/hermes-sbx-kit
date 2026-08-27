@@ -2,18 +2,16 @@ schemaVersion: "2"
 kind: sandbox
 name: hermes-agent
 displayName: Hermes Agent
-description: Hermes Agent with host-managed provider credentials
-
-# Inherit the built-in shell kit's provider credential mappings, proxy behavior,
-# network defaults, and sandbox configuration.
-extends: shell
+description: Standalone Hermes Agent with host-managed OpenAI and Anthropic credentials
+sourceURL: https://github.com/dvdksn/hermes-sbx-kit
 
 sandbox:
   image: "docker.io/davidkarlsson416/hermes-agent-image:latest"
-  # The shell parent appends `-l`. This launcher strips that inherited shell
-  # argument before invoking Hermes.
   entrypoint:
     - /usr/local/bin/hermes-start
+  command:
+    default: []
+    interactive: []
 
 agentInstructions:
   filename: AGENTS.md
@@ -23,6 +21,7 @@ permissions:
     allow:
       - hermes-agent.nousresearch.com
       - github.com
+      - api.github.com
       - raw.githubusercontent.com
       - objects.githubusercontent.com
       - release-assets.githubusercontent.com
@@ -30,12 +29,40 @@ permissions:
       - files.pythonhosted.org
       - astral.sh
       - '*.astral.sh'
-      - portal.nousresearch.com
+      - api.openai.com
+      - api.anthropic.com
       - duckduckgo.com
       - archive.ubuntu.com
       - security.ubuntu.com
       - ports.ubuntu.com
       - download.docker.com
+
+credentials:
+  - service: anthropic
+    description: Anthropic API key for direct Claude inference
+    apiKey:
+      name: ANTHROPIC_API_KEY
+      proxyManaged: true
+      inject:
+        - domain: api.anthropic.com
+          header: x-api-key
+          format: "%s"
+  - service: openai
+    description: OpenAI API key for direct OpenAI inference
+    apiKey:
+      name: OPENAI_API_KEY
+      proxyManaged: true
+      inject:
+        - domain: api.openai.com
+          scheme: bearer
+  - service: github
+    description: GitHub token for API and gh CLI access
+    apiKey:
+      name: GITHUB_TOKEN
+      proxyManaged: true
+      inject:
+        - domain: api.github.com
+          scheme: bearer
 
 environment:
   variables:

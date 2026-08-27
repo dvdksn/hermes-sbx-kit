@@ -9,6 +9,11 @@ kits:
 
 # No workspace is mounted. CPU and memory use the sbx defaults.
 
+env:
+  # The image entrypoint waits for scripts/create to attach the persistent
+  # HERMES_HOME mount before Hermes opens its config or SQLite database.
+  HERMES_WAIT_FOR_HOME_MOUNT: "1"
+
 secrets:
   anthropic:
     ref: op://Work/Anthropic/credential
@@ -18,3 +23,20 @@ secrets:
     refresh: 55m
   github:
     command: gh auth token
+    refresh: 55m
+
+# Third-party schema v2 kits require explicit host-side approval for each
+# credential mechanism and injection domain. These entries contain no secrets.
+bindings:
+  anthropic:
+    apiKey:
+      domains:
+        - api.anthropic.com
+  openai:
+    apiKey:
+      domains:
+        - api.openai.com
+  github:
+    apiKey:
+      domains:
+        - api.github.com
